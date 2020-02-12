@@ -1,11 +1,11 @@
 package com.example.kotlintestservice.service
 
-import com.example.kotlintestservice.controller.requests.CreateUserRequest
-import com.example.kotlintestservice.controller.requests.RemoveUserRequest
-import com.example.kotlintestservice.controller.requests.UpdateUserRequest
+import com.example.kotlintestservice.requests.CreateUserRequest
+import com.example.kotlintestservice.requests.UpdateUserRequest
 import com.example.kotlintestservice.entity.User
 import com.example.kotlintestservice.exceptions.UserAlreadyExistsException
 import com.example.kotlintestservice.repository.UserRepository
+import com.example.kotlintestservice.requests.RemoveUserRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -17,7 +17,7 @@ class UserServiceImpl (private val userRepository: UserRepository): UserService{
     override fun create(req: CreateUserRequest): User {
         return userRepository.findByName(req.name)?.let {
             throw UserAlreadyExistsException("A user with name: ${req.name} already exists")
-        }?: userRepository.save(User(req.name))
+        }?: userRepository.save(User(req.name, req.last))
     }
 
     override fun getById(id: Long): Mono<User> {
@@ -48,12 +48,11 @@ class UserServiceImpl (private val userRepository: UserRepository): UserService{
         }?: throw UserAlreadyExistsException("Could not update user")
     }
 
-//    override fun removeUser(id: Long, req: RemoveUserRequest): User {
-//        return userRepository.findByIdOrNull(id)?.let { user ->
-//            user.name = req.name
-//            userRepository.delete(user)
-//        }?: throw UserAlreadyExistsException("Could not remove user")
-//    }
+    override fun removeUser(id: Long) {
+        return userRepository.deleteById(id)?.let{
+            throw UserAlreadyExistsException("Can not remove user")
 
+        }
+    }
 
 }
